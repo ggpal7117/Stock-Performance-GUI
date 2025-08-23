@@ -1,0 +1,8 @@
+pandas
+numpy
+streamlit
+matplotlib
+mplfinance
+lxml
+plotly
+wikipedia-api
