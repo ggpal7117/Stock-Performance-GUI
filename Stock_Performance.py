@@ -422,7 +422,8 @@ def main():
                 },
                 height=775,
                 width=1200,
-                color = "Industry"
+                color = "Industry",
+                points = False  # Show outliers
             )
             fig.update_layout(xaxis_tickangle=-45)
             st.plotly_chart(fig, theme="streamlit")
