@@ -8,6 +8,7 @@ The third page provides users a chance the learn which specific industries are p
 
 
 **Note: This is not stock trading advice. This dashboard is only meant for users to understand how certain companies are performing.**
+
 **Note: Not all SP500 tickers are included, as some don't have 10 years of historical stock data, such as GE Vernova (GEV), which only went public in 2024.**
 
 
