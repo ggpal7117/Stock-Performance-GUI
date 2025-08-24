@@ -26,22 +26,18 @@ range_shift = {i : i*-21 for i in range(1,301)} # 1 month = 21 trading days up t
 # # Access All Possible Data
 @st.cache_data
 def load_data():
-    all_stock_data = pd.DataFrame()
-    #base_dir = os.path.join(os.path.dirname(__file__), "data")  # look inside repo
-    stock_2015 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2015_stock_data.csv")
-    stock_2016 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2016_stock_data.csv")
-    stock_2017 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2017_stock_data.csv")
-    stock_2018 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2018_stock_data.csv")
-    stock_2019 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2019_stock_data.csv")
-    stock_2020 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2020_stock_data.csv")
-    stock_2021 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2021_stock_data.csv")
-    stock_2022 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2022_stock_data.csv")
-    stock_2023 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2023_stock_data.csv")
-    stock_2024 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2024_stock_data.csv")
-    stock_2025 = pd.read_csv(r"C:\Users\ggpal\OneDrive\Documents\StockPerformanceApp\Data\2025_stock_data.csv")
-    all_stock_data = pd.concat([stock_2015, stock_2016, stock_2017, stock_2018, stock_2019, stock_2020, stock_2021, stock_2022, stock_2023, stock_2024, stock_2025], ignore_index=True)
+    base_dir = os.path.dirname(__file__)  # folder where your .py file lives
+    csv_files = [
+        "2015_stock_data.csv", "2016_stock_data.csv", "2017_stock_data.csv",
+        "2018_stock_data.csv", "2019_stock_data.csv", "2020_stock_data.csv",
+        "2021_stock_data.csv", "2022_stock_data.csv", "2023_stock_data.csv",
+        "2024_stock_data.csv", "2025_stock_data.csv"
+    ]
 
-
+    all_stock_data = pd.concat(
+        [pd.read_csv(os.path.join(base_dir, f)) for f in csv_files],
+        ignore_index=True
+    )
     all_stock_data["Date"] = pd.to_datetime(all_stock_data["Date"])
 
     # Filter stocks with 10 years of data
@@ -460,3 +456,4 @@ def main():
 # Run App
 if __name__ == "__main__":
     main()
+
