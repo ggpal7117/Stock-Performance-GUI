@@ -7,6 +7,7 @@ import sys
 import lxml
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import plotly.express as px
 import wikipedia
 import os
 # Acess all SP500 Tickers/Companies
@@ -174,7 +175,7 @@ def find_valid_stocks(time_range, return_period, returns_option, volatility_opti
     valid_tickers = valid_stock(ret_range, vol_range, time_range, return_period)
     if returns_option == "Low Returns":
         valid_tickers = valid_tickers.sort_values(by = ["mean", "std"], ascending = [True, False])
-    elif volatility_option == "High Volatility":
+    elif volatility_option == "High Volatility" and returns_option != "Low Returns":
         valid_tickers = valid_tickers.sort_values(by = ["std", "mean"], ascending = [False, False])
 
     plotting_data=valid_tickers.head()
@@ -194,13 +195,24 @@ def query_stock(time_range, return_period, ticker):
 
 
 # print(find_valid_stocks(24, 12, "High Returns", "Low Volatility"))
+ticker_to_industry = dict(zip(tickers_df["Symbol"], tickers_df['GICS Sector']))
+
+@st.cache_data
+# Industry Performance
+def industry_stats(time_range, return_period):
+    df = returns_and_volatility_info(time_range, return_period)[1]
+    df.columns = ["Ticker", "Mean_Returns", "Dev_Returns"]
+    df["Industry"] = df['Ticker'].map(ticker_to_industry) 
+    df = df.groupby('Industry', as_index=False)[["Mean_Returns", "Dev_Returns"]].mean()
+    return df.sort_values(by = ["Mean_Returns", "Dev_Returns"], ascending = [False, True])
+
 
 
 def main():
     st.set_page_config(page_title="Simulation App", layout="centered")
 
     # Sidebar Navigation
-    page = st.sidebar.radio("📂 Navigate", ["Stock Performance Analysis", "Individual Stock Performance"])
+    page = st.sidebar.radio("📂 Navigate", ["Stock Performance Analysis", "Individual Stock Performance", "Industry Performance"])
 
     # -------------------------
     # PAGE 1: Stock Performance Analysis
@@ -364,5 +376,78 @@ def main():
         except Exception as e:
             st.warning(f"An error occurred while fetching Wikipedia info: {str(e)}")
 
+
+    # -------------------------
+    # PAGE 3: Industry Performance
+    # -------------------------
+    elif page == "Industry Performance":
+        st.title("🏭 Industry Performance Analysis")
+        st.write("This page allows you to explore performance trends across different industries (GICS Sectors) in the S&P 500.")
+        st.write("You can select the return period and simulation timeframe to see how various industries have performed historically.")
+        st.write("Data is from 8/22/2015 - 8/22/2025")
+
+        # --- Inputs ---
+        return_length = st.slider("⏱️ Return Period (months)", min_value=1, max_value=15, value=1, step=1)
+        timeframe = st.slider("📅 Simulation Timeframe (months)",
+                            min_value=2*return_length,
+                            max_value=8*return_length,
+                            value=2*return_length,
+                            step=1)
+        
+        industry_df = industry_stats(timeframe, return_length)
+
+        industry_df["Mean_Returns"] = industry_df["Mean_Returns"].round(2)
+        industry_df["Dev_Returns"] = industry_df["Dev_Returns"].round(2)
+
+        
+
+        st.subheader("📊 Industry Performance Table")
+        st.dataframe(industry_df)
+        # Format text annotations for bars
+
+        all_data = returns_and_volatility_info(timeframe, return_length)[0]
+        all_data["Industry"] = all_data['Ticker'].map(ticker_to_industry)
+        
+        bar_tab, box_tab = st.tabs(["📊 Industry Bar Chart", "📦 Industry Box Plots"])
+        with box_tab:
+            st.subheader("📦 Industry Returns Distribution")
+            fig = px.box(
+                all_data.dropna(subset=["Return"]),
+                x="Industry",
+                y="Return",
+                title="Industry Returns Distribution",
+                labels={
+                    "Return": "Returns",
+                    "Industry": "GICS Sector"
+                },
+                height=775,
+                width=1200,
+                color = "Industry"
+            )
+            fig.update_layout(xaxis_tickangle=-45)
+            st.plotly_chart(fig, theme="streamlit")
+        with bar_tab:
+            st.subheader("📊 Industry Mean Returns with Volatility")
+            fig = px.bar(
+                industry_df,  # Use the modified DataFrame
+                x='Industry',
+                y='Mean_Returns',
+                error_y='Dev_Returns',
+                title="Industry Mean Returns",
+                labels={
+                    "Mean_Returns": "Mean Returns",
+                    "Industry": "GICS Sector",
+                    "Dev_Returns": "Volatility (Std Dev)"
+                },
+                height=600,
+                width=1000,
+                hover_data=["Mean_Returns", "Dev_Returns"]  # Only show these in hover
+            )
+
+
+            # Position text above bars
+            fig.update_layout(xaxis_tickangle=-45)
+            st.plotly_chart(fig)
+                                            
 if __name__ == "__main__":
-    main()
+    main() 
