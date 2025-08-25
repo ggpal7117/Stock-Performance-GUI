@@ -10,8 +10,20 @@ import plotly.graph_objects as go
 import plotly.express as px
 import wikipedia
 import os
+import requests
 # Acess all SP500 Tickers/Companies
-tickers_df = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")[0]
+url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+}
+
+response = requests.get(url, headers=headers)
+tables = pd.read_html(response.text)
+
+
+tickers_df = tables[0]
+
+
 tickers = tickers_df.Symbol.tolist()
 tickers_df["Name"] = tickers_df["Security"] + " - " + tickers_df["GICS Sector"]
 tickers_to_name = dict(zip(tickers_df["Symbol"], tickers_df["Name"]))
@@ -456,4 +468,5 @@ def main():
 # Run App
 if __name__ == "__main__":
     main()
+
 
