@@ -6,4 +6,5 @@ mplfinance
 lxml
 plotly
 wikipedia
+requests
 
