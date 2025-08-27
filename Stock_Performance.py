@@ -438,7 +438,8 @@ def main():
                 height=775,
                 width=1200,
                 color = "Industry",
-                points = False  # Show outliers
+                points = 'all', # Show outliers
+                hover_data = ['Ticker']
             )
             fig.update_layout(xaxis_tickangle=-45)
             st.plotly_chart(fig, theme="streamlit")
@@ -468,5 +469,6 @@ def main():
 # Run App
 if __name__ == "__main__":
     main()
+
 
 
