@@ -420,19 +420,19 @@ def main():
         st.dataframe(industry_df)
         # Format text annotations for bars
 
-        all_data = returns_and_volatility_info(timeframe, return_length)[0]
+        all_data = returns_and_volatility_info(timeframe, return_length)[1]
         all_data["Industry"] = all_data['Ticker'].map(ticker_to_industry)
         
         bar_tab, box_tab = st.tabs(["📊 Industry Bar Chart", "📦 Industry Box Plots"])
         with box_tab:
             st.subheader("📦 Industry Returns Distribution")
             fig = px.box(
-                all_data.dropna(subset=["Return"]),
+                all_data.dropna(),
                 x="Industry",
-                y="Return",
+                y="mean",
                 title="Industry Returns Distribution",
                 labels={
-                    "Return": "Returns",
+                    "mean": "Returns",
                     "Industry": "GICS Sector"
                 },
                 height=775,
@@ -469,6 +469,7 @@ def main():
 # Run App
 if __name__ == "__main__":
     main()
+
 
 
 
